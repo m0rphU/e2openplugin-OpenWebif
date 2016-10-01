@@ -46,6 +46,11 @@ def isOriginalWebifInstalled():
 
 	return False
 
+def isOriginalWebifDefault():
+	return isOriginalWebifInstalled() \
+		and config.plugins.Webinterface.enabled.value \
+		and config.plugins.Webinterface.http.port.value == 80
+
 def buildRootTree(session):
 	root = RootController(session)
 
@@ -198,7 +203,8 @@ def HttpdStart(session):
 				config.OpenWebif.https_enabled.save()
 
 		#Streaming requires listening on 127.0.0.1:80
-		if port != 80:
+		#but only if there is not already another webif running
+		if port != 80 and not isOriginalWebifDefault():
 			try:
 				if has_ipv6 and fileExists('/proc/net/if_inet6') and version.major >= 12:
 					# use ipv6
